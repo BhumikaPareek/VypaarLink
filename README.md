@@ -1,8 +1,8 @@
-# VyaparLink
+# VypaarLink
 
-**A digital business companion for local kirana stores and small retailers.**
+**A responsive web platform for local kirana stores and small retailers.**
 
-Vyapar Link helps local shopkeepers manage customer credit (udhaar), payments, transaction records, and business activity from one place — moving from paper notebooks to a reliable digital system.
+VypaarLink helps local shopkeepers manage customer credit (udhaar), payments, transaction records, inventory, and everyday business activities from one place — moving from paper notebooks to a reliable digital system.
 
 ---
 
@@ -10,23 +10,24 @@ Vyapar Link helps local shopkeepers manage customer credit (udhaar), payments, t
 
 Many local retailers still manage customer credit, payments, and business records through notebooks, memory, or disconnected methods. This leads to:
 
-- Disputed transactions with no shared record
-- Lost payment history
-- No visibility into outstanding credit
-- No way to notify customers digitally
+- Disputed transactions due to unclear records
+- Difficulties tracking payment history
+- Limited visibility into outstanding credit
+- Time-consuming manual record keeping
 
 ---
 
 ## Solution
 
-Vyapar Link provides a shared, verified digital ledger between shopkeeper and customer. Key to the approach is **mutual transaction confirmation** — both parties see and can confirm the same record, helping reduce disputes through a shared record.
+VypaarLink provides a shared, verified digital ledger between shopkeeper and customer. Key to the approach is **mutual transaction confirmation** — both parties see and can confirm the same record, helping reduce disputes through a shared record.
 
 ---
 
 ## Current Stage
 
 > **Stage 0 — Foundation**
-> Project scaffolding, architecture, and tooling setup. No business features implemented yet.
+> 
+> Project structure, architecture, development tooling, and database foundation have been established. Core business features are being developed incrementally.
 
 ---
 
@@ -70,7 +71,7 @@ VypaarLink/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/VypaarLink.git
+git clone https://github.com/BhumikaPareek/VypaarLink.git
 cd VypaarLink
 ```
 
@@ -109,13 +110,12 @@ Backend API → http://localhost:3000
 ## Development Roadmap
 
 - [x] **Stage 0** — Foundation: project structure, tooling, architecture
-- [ ] **Stage 1** — Core MVP: auth, ledger, transactions, mutual confirmation
-- [ ] **Stage 2** — Dashboard: insights, summaries, customer overview
-- [ ] **Stage 3** — Inventory: products, stock, pricing, alerts
-- [ ] **Stage 4** — Supplier Workflow: suppliers, orders, restock
-- [ ] **Stage 5** — Business Intelligence: trends, analytics, insights
-- [ ] **Stage 6** — Intelligent Assistant: AI-powered business queries
-- [ ] **Stage 7** — Production Refinement: security, testing, deployment
+- [ ] **Stage 1** — Core MVP: authentication, shop/customer management, ledger, transactions, payments, mutual confirmation, basic dashboard
+- [ ] **Stage 2** — Inventory: products, stock, pricing, alerts
+- [ ] **Stage 3** — Supplier Workflow: suppliers, orders, restock
+- [ ] **Stage 4** — Business Intelligence: trends, analytics, insights
+- [ ] **Stage 5** — Intelligent Assistant: AI-powered business queries
+- [ ] **Stage 6** — Production Refinement: security, testing, deployment
 
 ---
 
