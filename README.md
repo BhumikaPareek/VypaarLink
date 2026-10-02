@@ -1,4 +1,4 @@
-# Vyapar Link
+# VyaparLink
 
 **A digital business companion for local kirana stores and small retailers.**
 
@@ -19,7 +19,7 @@ Many local retailers still manage customer credit, payments, and business record
 
 ## Solution
 
-Vyapar Link provides a shared, verified digital ledger between shopkeeper and customer. Key to the approach is **mutual transaction confirmation** — both parties see and can confirm the same record, eliminating disputes.
+Vyapar Link provides a shared, verified digital ledger between shopkeeper and customer. Key to the approach is **mutual transaction confirmation** — both parties see and can confirm the same record, helping reduce disputes through a shared record.
 
 ---
 
