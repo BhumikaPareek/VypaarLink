@@ -1,0 +1,143 @@
+// =============================================================================
+// Vyapar Link — Prisma Schema
+// Database: PostgreSQL
+// =============================================================================
+//
+// Design principles:
+// - All tables use UUID primary keys (more secure than auto-increment integers)
+// - Timestamps on every table (createdAt, updatedAt) for audit trail
+// - Soft-delete pattern (deletedAt) where data must be preserved for ledger integrity
+// - Enum types defined in DB for role and status fields
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SHOPKEEPER
+  CUSTOMER
+}
+
+enum TransactionType {
+  CREDIT  // Shopkeeper gave goods/services on credit
+  PAYMENT // Customer made a payment
+}
+
+enum TransactionStatus {
+  PENDING   // Recorded by one party, not yet confirmed
+  CONFIRMED // Confirmed by both parties
+  FLAGGED   // Customer has raised a concern / dispute
+}
+
+// ── Users ──────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String
+  role         UserRole
+  isActive     Boolean  @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // A shopkeeper owns a shop; a customer connects to shops
+  shop              Shop?          @relation("ShopOwner")
+  shopConnections   ShopCustomer[] @relation("CustomerConnections")
+
+  // Transactions recorded by this user (shopkeeper records credit/payment)
+  recordedTransactions Transaction[] @relation("RecordedBy")
+
+  @@map("users")
+}
+
+// ── Shops ──────────────────────────────────────────────────────────────────────
+
+model Shop {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  address     String?
+  phone       String?
+  isActive    Boolean @default(true)
+
+  ownerId     String  @unique
+  owner       User    @relation("ShopOwner", fields: [ownerId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Customers connected to this shop
+  customers    ShopCustomer[]
+  // All transactions for this shop
+  transactions Transaction[]
+
+  @@map("shops")
+}
+
+// ── Shop-Customer Relationship (Join Table) ────────────────────────────────────
+// A customer can be connected to multiple shops.
+// A shop can have multiple customers.
+// This join table tracks the relationship and when it was established.
+
+model ShopCustomer {
+  id         String   @id @default(uuid())
+  shopId     String
+  customerId String
+  isActive   Boolean  @default(true)  // False = customer disconnected from shop
+  joinedAt   DateTime @default(now())
+
+  shop       Shop  @relation(fields: [shopId], references: [id])
+  customer   User  @relation("CustomerConnections", fields: [customerId], references: [id])
+
+  // Ensure a customer is only connected to the same shop once
+  @@unique([shopId, customerId])
+  @@map("shop_customers")
+}
+
+// ── Transactions ───────────────────────────────────────────────────────────────
+// A transaction is either a CREDIT (shopkeeper gave goods on credit)
+// or a PAYMENT (customer paid back some amount).
+//
+// Key design: status field enables mutual confirmation.
+// When shopkeeper records a transaction, status = PENDING.
+// When customer confirms, status = CONFIRMED.
+// If customer disagrees, status = FLAGGED (for clarification).
+
+model Transaction {
+  id          String            @id @default(uuid())
+  shopId      String
+  customerId  String
+  amount      Decimal           @db.Decimal(10, 2)  // Up to 99,999,999.99
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  note        String?           // Shopkeeper's note (e.g. "Rice + Oil")
+  recordedById String
+
+  // Mutual confirmation fields
+  confirmedAt  DateTime?   // When customer confirmed
+  flaggedAt    DateTime?   // When customer flagged
+  flagReason   String?     // Customer's reason for flagging
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?  // Soft delete — transactions must never be hard-deleted
+
+  shop         Shop @relation(fields: [shopId], references: [id])
+  recordedBy   User @relation("RecordedBy", fields: [recordedById], references: [id])
+
+  // Index for fast lookup of a customer's transactions at a shop
+  @@index([shopId, customerId])
+  @@index([customerId])
+  @@map("transactions")
+}

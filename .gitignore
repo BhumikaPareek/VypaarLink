@@ -1,0 +1,57 @@
+# ============================================================
+# Vyapar Link — .gitignore
+# ============================================================
+
+# ----- Environment / Secrets -----
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ----- Node.js -----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----- Build Outputs -----
+dist/
+build/
+out/
+.output/
+
+# ----- TypeScript -----
+*.tsbuildinfo
+
+# ----- Prisma -----
+# Keep migrations tracked in git; ignore generated client
+backend/node_modules/.prisma/
+
+# ----- Logs -----
+logs/
+*.log
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Editor / IDE -----
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ----- Testing -----
+coverage/
+.nyc_output/
+
+# ----- Misc -----
+*.pem
+.cache/
+tmp/
+temp/
