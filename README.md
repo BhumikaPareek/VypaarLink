@@ -110,7 +110,7 @@ Backend API → http://localhost:3000
 ## Development Roadmap
 
 - [x] **Stage 0** — Foundation: project structure, tooling, architecture
-- [ ] **Stage 1** — Core MVP: authentication, shop/customer management, ledger, transactions, payments, mutual confirmation, basic dashboard
+- [x] **Stage 1** — Core MVP: authentication, shop/customer management, ledger, transactions, payments, mutual confirmation, basic dashboard
 - [ ] **Stage 2** — Inventory: products, stock, pricing, alerts
 - [ ] **Stage 3** — Supplier Workflow: suppliers, orders, restock
 - [ ] **Stage 4** — Business Intelligence: trends, analytics, insights
