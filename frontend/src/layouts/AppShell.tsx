@@ -106,7 +106,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Transactions', path: '/transactions', icon: <LedgerIcon />, available: true },
   { label: 'Payments', path: '/payments', icon: <PaymentIcon />, available: true },
   { label: 'Inventory', path: '/inventory', icon: <BoxIcon />, available: true },
-  { label: 'Suppliers', path: '/suppliers', icon: <TruckIcon />, available: false },
+  { label: 'Suppliers', path: '/suppliers', icon: <TruckIcon />, available: true },
+  { label: 'Purchase Orders', path: '/purchase-orders', icon: <LedgerIcon />, available: true },
   { label: 'Analytics', path: '/analytics', icon: <ChartIcon />, available: false },
 ]
 

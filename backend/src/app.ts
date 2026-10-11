@@ -71,6 +71,12 @@ app.use('/api/v1/dashboard', dashboardRouter)
 import inventoryRouter from './modules/inventory/routes'
 app.use('/api/v1/inventory', inventoryRouter)
 
+import supplierRouter from './modules/supplier/routes'
+app.use('/api/v1/suppliers', supplierRouter)
+
+import purchaseOrderRouter from './modules/purchaseOrder/routes'
+app.use('/api/v1/purchase-orders', purchaseOrderRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {
