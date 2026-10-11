@@ -99,6 +99,8 @@ model Shop {
   customers    ShopCustomer[]
   // All transactions for this shop
   transactions Transaction[]
+  // Inventory products for this shop
+  products     Product[]
 
   @@map("shops")
 }
@@ -164,4 +166,57 @@ model Transaction {
   @@index([shopId, customerId])
   @@index([customerId])
   @@map("transactions")
+}
+
+// ── Inventory Enums ────────────────────────────────────────────────────────────
+
+enum StockMovementType {
+  OPENING_STOCK
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+  SALE
+}
+
+// ── Products ───────────────────────────────────────────────────────────────────
+
+model Product {
+  id                String  @id @default(uuid())
+  shopId            String
+  name              String
+  sku               String?
+  category          String?
+  price             Decimal @db.Decimal(10, 2)
+  quantity          Int     @default(0)
+  unit              String  @default("pcs")
+  lowStockThreshold Int     @default(5)
+  isActive          Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shop      Shop            @relation(fields: [shopId], references: [id])
+  movements StockMovement[]
+
+  @@index([shopId])
+  @@index([shopId, isActive])
+  @@map("products")
+}
+
+// ── Stock Movements ────────────────────────────────────────────────────────────
+
+model StockMovement {
+  id        String            @id @default(uuid())
+  productId String
+  shopId    String
+  type      StockMovementType
+  quantity  Int
+  note      String?
+  createdAt DateTime          @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([shopId])
+  @@map("stock_movements")
 }

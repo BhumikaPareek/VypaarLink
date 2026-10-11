@@ -14,7 +14,14 @@ export async function apiGetTransactions(params?: { customerId?: string; type?: 
   return apiFetch<{ transactions: Transaction[]; total: number; page: number }>(`${BASE}${query ? `?${query}` : ''}`)
 }
 
-export async function apiCreateCredit(data: { customerId: string; amount: string | number; note?: string; transactionDate?: string; dueDate?: string }): Promise<{ transaction: Transaction }> {
+export async function apiCreateCredit(data: {
+  customerId: string
+  amount: string | number
+  note?: string
+  transactionDate?: string
+  dueDate?: string
+  items?: Array<{ productId: string; quantity: number }>
+}): Promise<{ transaction: Transaction }> {
   return apiFetch<{ transaction: Transaction }>(`${BASE}/credit`, {
     method: 'POST',
     body: JSON.stringify(data),

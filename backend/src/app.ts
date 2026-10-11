@@ -68,6 +68,9 @@ app.use('/api/v1/customers', customerRouter)
 app.use('/api/v1/transactions', transactionRouter)
 app.use('/api/v1/dashboard', dashboardRouter)
 
+import inventoryRouter from './modules/inventory/routes'
+app.use('/api/v1/inventory', inventoryRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {

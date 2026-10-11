@@ -51,8 +51,30 @@ const verifyCustomerInShop = async (shopId: string, customerId: string) => {
   }
 }
 
+import { deductStockForSale } from '../inventory/service'
+
 export const createCreditTransaction = async (shopId: string, recordedById: string, data: z.infer<typeof createCreditSchema>) => {
   await verifyCustomerInShop(shopId, data.customerId)
+
+  if (data.items && data.items.length > 0) {
+    return prisma.$transaction(async (tx) => {
+      await deductStockForSale(tx, shopId, data.items!)
+
+      return tx.transaction.create({
+        data: {
+          shopId,
+          customerId: data.customerId,
+          amount: new Prisma.Decimal(data.amount),
+          type: 'CREDIT',
+          note: data.note || null,
+          recordedById,
+          transactionDate: data.transactionDate || new Date(),
+          dueDate: data.dueDate || null,
+        }
+      })
+    })
+  }
+
   return prisma.transaction.create({
     data: {
       shopId,

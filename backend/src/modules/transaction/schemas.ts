@@ -6,6 +6,10 @@ export const createCreditSchema = z.object({
   note: z.string().trim().max(500).optional(),
   transactionDate: z.coerce.date().optional(),
   dueDate: z.coerce.date().optional(),
+  items: z.array(z.object({
+    productId: z.string().uuid(),
+    quantity: z.coerce.number().int().positive('Quantity must be positive'),
+  })).optional(),
 })
 
 export const createPaymentSchema = z.object({
