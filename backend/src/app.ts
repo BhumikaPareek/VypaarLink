@@ -55,11 +55,19 @@ app.get('/health', (_req, res) => {
 })
 
 // ── API Routes ────────────────────────────────────────────────────────
-// Routes will be mounted here in Stage 1:
-// app.use('/api/v1/auth', authRouter)
-// app.use('/api/v1/shops', shopRouter)
-// app.use('/api/v1/transactions', transactionRouter)
-// app.use('/api/v1/dashboard', dashboardRouter)
+import authRouter from './modules/auth/routes'
+
+app.use('/api/v1/auth', authRouter)
+import shopRouter from './modules/shop/routes'
+import customerRouter from './modules/customer/routes'
+import transactionRouter from './modules/transaction/routes'
+import dashboardRouter from './modules/dashboard/routes'
+
+app.use('/api/v1/shop', shopRouter)
+app.use('/api/v1/customers', customerRouter)
+app.use('/api/v1/transactions', transactionRouter)
+app.use('/api/v1/dashboard', dashboardRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {

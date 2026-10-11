@@ -47,6 +47,7 @@ model User {
   passwordHash String
   role         UserRole
   isActive     Boolean  @default(true)
+  isClaimed    Boolean  @default(true)
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -59,6 +60,23 @@ model User {
   recordedTransactions Transaction[] @relation("RecordedBy")
 
   @@map("users")
+}
+
+// ── Phone Verification (OTP) ───────────────────────────────────────────────────
+
+model PhoneVerification {
+  id         String   @id @default(uuid())
+  phone      String   @unique
+  otpHash    String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now())
+  verified   Boolean  @default(false)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("phone_verifications")
 }
 
 // ── Shops ──────────────────────────────────────────────────────────────────────
@@ -128,6 +146,12 @@ model Transaction {
   confirmedAt  DateTime?   // When customer confirmed
   flaggedAt    DateTime?   // When customer flagged
   flagReason   String?     // Customer's reason for flagging
+
+  // Additional transaction details
+  transactionDate DateTime @default(now())
+  dueDate         DateTime?
+  paymentMethod   String?
+  reference       String?
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

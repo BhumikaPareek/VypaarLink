@@ -1,42 +1,110 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { AuthProvider, useAuthContext } from '@/store/AuthContext'
+import { ShopProvider, useShop } from '@/store/ShopContext'
+import AppShell from '@/layouts/AppShell'
+import LoginPage from '@/features/auth/LoginPage'
+import RegisterPage from '@/features/auth/RegisterPage'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { CustomersPage } from '@/pages/CustomersPage'
+import { CustomerProfilePage } from '@/pages/CustomerProfilePage'
+import { TransactionsPage } from '@/pages/TransactionsPage'
+import { PaymentsPage } from '@/pages/PaymentsPage'
+import { ShopSetupPage } from '@/pages/ShopSetupPage'
+import { CustomerLedgerPage } from '@/pages/CustomerLedgerPage'
+import { type ReactNode } from 'react'
 
-/**
- * App — Root routing component
- *
- * Stage 0: Minimal placeholder.
- * Routes will be expanded in Stage 1 when authentication and pages are built.
- *
- * Planned route structure:
- *   /               → Redirect based on auth state
- *   /login          → Login page
- *   /register       → Registration page
- *   /dashboard      → Shopkeeper dashboard (protected)
- *   /ledger/:id     → Customer ledger view (protected)
- *   /customer/...   → Customer-facing views (protected)
- */
-function App() {
+function FullPageSpinner() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
+      <svg className="h-8 w-8 animate-spin text-green-600" viewBox="0 0 24 24" fill="none">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      </svg>
+      <span className="text-sm text-gray-400">Loading VypaarLink…</span>
+    </div>
+  )
+}
+
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { status } = useAuthContext()
+
+  if (status === 'loading') return <FullPageSpinner />
+  if (status === 'unauthenticated') return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+function PublicOnlyRoute({ children }: { children: ReactNode }) {
+  const { status } = useAuthContext()
+
+  if (status === 'loading') return <FullPageSpinner />
+  if (status === 'authenticated') return <Navigate to="/dashboard" replace />
+  return <>{children}</>
+}
+
+function ShopGuard({ children }: { children: ReactNode }) {
+  const { user } = useAuthContext();
+  const { shop, isLoading } = useShop();
+
+  if (isLoading) return <FullPageSpinner />;
+  
+  if (user?.role === 'SHOPKEEPER' && !shop) {
+    return <Navigate to="/shop/setup" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+function ComingSoon({ module: mod }: { module: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-6">
+      <div className="text-5xl mb-4">🚧</div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-2">{mod}</h2>
+      <p className="text-gray-500 text-sm max-w-xs">
+        This module is planned for a future stage. Check the dashboard for the roadmap.
+      </p>
+    </div>
+  )
+}
+
+function RootRedirect() {
+  const { status } = useAuthContext()
+  if (status === 'loading') return <FullPageSpinner />
+  return <Navigate to={status === 'authenticated' ? '/dashboard' : '/login'} replace />
+}
+
+function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<RootRedirect />} />
+
+      <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+      <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
+
+      <Route element={<ProtectedRoute><ShopProvider><Outlet /></ShopProvider></ProtectedRoute>}>
+        <Route path="/shop/setup" element={<ShopSetupPage />} />
+        
+        <Route element={<ShopGuard><AppShell /></ShopGuard>}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/customer/ledger/:shopId" element={<CustomerLedgerPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/customers/:customerId" element={<CustomerProfilePage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/payments" element={<PaymentsPage />} />
+          <Route path="/inventory" element={<ComingSoon module="Inventory" />} />
+          <Route path="/suppliers" element={<ComingSoon module="Suppliers" />} />
+          <Route path="/analytics" element={<ComingSoon module="Analytics" />} />
+        </Route>
+      </Route>
+
       <Route
         path="*"
         element={
-          <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
-            <div className="max-w-sm">
-              <div className="mb-4 text-4xl font-bold text-green-600">
-                Vyapar Link
-              </div>
-              <p className="text-gray-500 text-sm">
-                Foundation is set up.
-                <br />
-                Business features coming in Stage 1.
-              </p>
-              <p className="mt-4 rounded-md bg-gray-50 p-3 font-mono text-xs text-gray-400">
-                React + Vite + TypeScript ✓<br />
-                Tailwind CSS ✓<br />
-                React Router ✓<br />
-                TanStack Query ✓
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center min-h-screen gap-3 text-center px-6">
+            <div className="text-5xl">404</div>
+            <h1 className="text-xl font-semibold text-gray-800">Page not found</h1>
+            <a href="/dashboard" className="text-green-600 text-sm hover:underline">
+              Go to Dashboard
+            </a>
           </div>
         }
       />
@@ -44,4 +112,14 @@ function App() {
   )
 }
 
-export default App
+import { ToastProvider } from '@/components/ui/Toast'
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ToastProvider>
+  )
+}

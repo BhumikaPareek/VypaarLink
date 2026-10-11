@@ -7,7 +7,10 @@
  */
 
 import 'dotenv/config'
+import './config/env'          // Validates all env vars at startup — exits if invalid
+import { prisma } from './lib/prisma'
 import app from './app'
+
 
 const PORT = parseInt(process.env['PORT'] ?? '3000', 10)
 const HOST = process.env['HOST'] ?? 'localhost'
@@ -29,11 +32,13 @@ const server = app.listen(PORT, HOST, () => {
 // close the server cleanly before exiting.
 const shutdown = (signal: string) => {
   console.log(`\n[SERVER] ${signal} received. Shutting down gracefully...`)
-  server.close(() => {
+  server.close(async () => {
+    await prisma.$disconnect()
     console.log('[SERVER] HTTP server closed.')
     process.exit(0)
   })
 }
+
 
 process.on('SIGTERM', () => shutdown('SIGTERM'))
 process.on('SIGINT', () => shutdown('SIGINT'))

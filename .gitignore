@@ -55,3 +55,12 @@ coverage/
 .cache/
 tmp/
 temp/
+
+# Temporary Development Files
+scratch/
+patch-auth-service.js
+patch-dashboard.js
+*.bak
+
+# Local Test Scripts
+backend/e2e-test.ts
