@@ -113,7 +113,7 @@ Backend API → http://localhost:3000
 - [x] **Stage 1** — Core MVP: authentication, shop/customer management, ledger, transactions, payments, mutual confirmation, basic dashboard
 - [x] **Stage 2** — Inventory: products, stock, pricing, alerts
 - [x] **Stage 3** — Supplier Workflow: suppliers, orders, restock
-- [ ] **Stage 4** — Business Intelligence: trends, analytics, insights
+- [x] **Stage 4** — Business Intelligence: trends, analytics, insights
 - [ ] **Stage 5** — Intelligent Assistant: AI-powered business queries
 - [ ] **Stage 6** — Production Refinement: security, testing, deployment
 
