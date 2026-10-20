@@ -14,6 +14,7 @@ import { CustomerLedgerPage } from '@/pages/CustomerLedgerPage'
 import { InventoryPage } from '@/pages/InventoryPage'
 import { SuppliersPage } from '@/pages/SuppliersPage'
 import { PurchaseOrdersPage } from '@/pages/PurchaseOrdersPage'
+import { AnalyticsPage } from '@/pages/AnalyticsPage'
 import { type ReactNode } from 'react'
 
 function FullPageSpinner() {
@@ -57,18 +58,6 @@ function ShopGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function ComingSoon({ module: mod }: { module: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-6">
-      <div className="text-5xl mb-4">🚧</div>
-      <h2 className="text-xl font-semibold text-gray-800 mb-2">{mod}</h2>
-      <p className="text-gray-500 text-sm max-w-xs">
-        This module is planned for a future stage. Check the dashboard for the roadmap.
-      </p>
-    </div>
-  )
-}
-
 function RootRedirect() {
   const { status } = useAuthContext()
   if (status === 'loading') return <FullPageSpinner />
@@ -96,7 +85,7 @@ function AppRoutes() {
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
-          <Route path="/analytics" element={<ComingSoon module="Analytics" />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
         </Route>
       </Route>
 

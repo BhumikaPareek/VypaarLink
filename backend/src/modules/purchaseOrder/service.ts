@@ -258,23 +258,34 @@ export const recordGoodsReceipt = async (
   orderId: string,
   data: z.infer<typeof recordGoodsReceiptSchema>
 ) => {
-  const order = await prisma.purchaseOrder.findFirst({
-    where: { id: orderId, shopId },
-    include: { items: true },
-  })
-  if (!order) throw new Error('Purchase order not found')
-  if (order.status === 'DRAFT') {
-    throw new Error('Cannot receive goods for a DRAFT order. Please place the order first.')
-  }
-  if (order.status === 'CANCELLED') {
-    throw new Error('Cannot receive goods for a CANCELLED order')
-  }
-  if (order.status === 'RECEIVED') {
-    throw new Error('This order has already been fully received')
-  }
-
   return prisma.$transaction(async (tx) => {
-    // 1. Create goods receipt parent
+    // 1. Acquire parent purchase-order row lock first to serialize concurrent receipts on this order
+    const lockedRows = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT "id" FROM "purchase_orders"
+      WHERE "id" = ${orderId} AND "shopId" = ${shopId}
+      FOR UPDATE
+    `
+    if (!lockedRows || lockedRows.length === 0) {
+      throw new Error('Purchase order not found')
+    }
+
+    // 2. Fetch order and items INSIDE the transaction for fresh, isolated state
+    const order = await tx.purchaseOrder.findFirst({
+      where: { id: orderId, shopId },
+      include: { items: true },
+    })
+    if (!order) throw new Error('Purchase order not found')
+    if (order.status === 'DRAFT') {
+      throw new Error('Cannot receive goods for a DRAFT order. Please place the order first.')
+    }
+    if (order.status === 'CANCELLED') {
+      throw new Error('Cannot receive goods for a CANCELLED order')
+    }
+    if (order.status === 'RECEIVED') {
+      throw new Error('This order has already been fully received')
+    }
+
+    // 2. Create goods receipt parent
     const receipt = await tx.goodsReceipt.create({
       data: {
         purchaseOrderId: orderId,
@@ -284,8 +295,13 @@ export const recordGoodsReceipt = async (
       },
     })
 
-    // 2. Validate and process each received item line
-    for (const itemInput of data.items) {
+    // Sort received items deterministically by purchaseOrderItemId to reduce deadlock risk
+    const sortedItems = [...data.items].sort((a, b) =>
+      a.purchaseOrderItemId.localeCompare(b.purchaseOrderItemId)
+    )
+
+    // 3. Validate and process each received item line
+    for (const itemInput of sortedItems) {
       const orderItem = order.items.find((i) => i.id === itemInput.purchaseOrderItemId)
       if (!orderItem) {
         throw new Error(`Order item not found: ${itemInput.purchaseOrderItemId}`)
@@ -308,24 +324,25 @@ export const recordGoodsReceipt = async (
         },
       })
 
-      // Update order item received quantity
+      // Atomic increment of received quantity on purchase order item
       await tx.purchaseOrderItem.update({
         where: { id: orderItem.id },
         data: {
-          quantityReceived: orderItem.quantityReceived + itemInput.quantityReceived,
+          quantityReceived: { increment: itemInput.quantityReceived },
         },
       })
 
-      // Update product inventory stock
+      // Verify product belongs to this shop
       const product = await tx.product.findFirst({
         where: { id: orderItem.productId, shopId },
       })
       if (!product) throw new Error(`Product not found: ${orderItem.productId}`)
 
+      // Atomic increment on product inventory stock
       await tx.product.update({
         where: { id: orderItem.productId },
         data: {
-          quantity: product.quantity + itemInput.quantityReceived,
+          quantity: { increment: itemInput.quantityReceived },
         },
       })
 
@@ -341,10 +358,18 @@ export const recordGoodsReceipt = async (
       })
     }
 
-    // 3. Recalculate overall order status
+    // 4. Re-read all PO items within tx to detect concurrent over-receipt and recalculate status
     const allItems = await tx.purchaseOrderItem.findMany({
       where: { purchaseOrderId: orderId },
     })
+
+    for (const item of allItems) {
+      if (item.quantityReceived > item.quantityOrdered) {
+        throw new Error(
+          `Cannot receive goods: total received quantity exceeds ordered quantity for an item.`
+        )
+      }
+    }
 
     const allFullyReceived = allItems.every(
       (i) => i.quantityReceived >= i.quantityOrdered
@@ -374,24 +399,41 @@ export const recordSupplierPayment = async (
   orderId: string,
   data: z.infer<typeof recordSupplierPaymentSchema>
 ) => {
-  const order = await prisma.purchaseOrder.findFirst({
-    where: { id: orderId, shopId },
-  })
-  if (!order) throw new Error('Purchase order not found')
-  if (order.status === 'CANCELLED') {
-    throw new Error('Cannot record payments for a CANCELLED order')
-  }
-
-  const outstandingBalance = order.totalAmount.minus(order.paidAmount)
-  const paymentAmount = new Prisma.Decimal(data.amount)
-
-  if (paymentAmount.greaterThan(outstandingBalance)) {
-    throw new Error(
-      `Payment amount ₹${paymentAmount.toFixed(2)} exceeds outstanding balance ₹${outstandingBalance.toFixed(2)}`
-    )
-  }
-
   return prisma.$transaction(async (tx) => {
+    // 1. Fetch order INSIDE the transaction for fresh isolated state
+    const order = await tx.purchaseOrder.findFirst({
+      where: { id: orderId, shopId },
+    })
+    if (!order) throw new Error('Purchase order not found')
+    if (order.status === 'CANCELLED') {
+      throw new Error('Cannot record payments for a CANCELLED order')
+    }
+
+    const paymentAmount = new Prisma.Decimal(data.amount)
+    const initialOutstanding = order.totalAmount.minus(order.paidAmount)
+
+    if (paymentAmount.greaterThan(initialOutstanding)) {
+      throw new Error(
+        `Payment amount ₹${paymentAmount.toFixed(2)} exceeds outstanding balance ₹${initialOutstanding.toFixed(2)}`
+      )
+    }
+
+    // 2. Atomically increment paidAmount directly on the order row
+    const updatedOrder = await tx.purchaseOrder.update({
+      where: { id: orderId },
+      data: {
+        paidAmount: { increment: paymentAmount },
+      },
+    })
+
+    // 3. Verify that concurrent payments haven't exceeded the total amount
+    if (updatedOrder.paidAmount.greaterThan(updatedOrder.totalAmount)) {
+      throw new Error(
+        `Payment amount ₹${paymentAmount.toFixed(2)} exceeds outstanding balance ₹${initialOutstanding.toFixed(2)}`
+      )
+    }
+
+    // 4. Record supplier payment audit row
     const payment = await tx.supplierPayment.create({
       data: {
         shopId,
@@ -402,13 +444,6 @@ export const recordSupplierPayment = async (
         paymentMethod: data.paymentMethod,
         reference: data.reference || null,
         notes: data.notes || null,
-      },
-    })
-
-    await tx.purchaseOrder.update({
-      where: { id: orderId },
-      data: {
-        paidAmount: order.paidAmount.plus(paymentAmount),
       },
     })
 

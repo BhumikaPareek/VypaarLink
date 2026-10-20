@@ -57,8 +57,10 @@ export const createCreditTransaction = async (shopId: string, recordedById: stri
   await verifyCustomerInShop(shopId, data.customerId)
 
   if (data.items && data.items.length > 0) {
+    const sortedItems = [...data.items].sort((a, b) => a.productId.localeCompare(b.productId))
+
     return prisma.$transaction(async (tx) => {
-      await deductStockForSale(tx, shopId, data.items!)
+      await deductStockForSale(tx, shopId, sortedItems)
 
       return tx.transaction.create({
         data: {

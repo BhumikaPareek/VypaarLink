@@ -77,6 +77,9 @@ app.use('/api/v1/suppliers', supplierRouter)
 import purchaseOrderRouter from './modules/purchaseOrder/routes'
 app.use('/api/v1/purchase-orders', purchaseOrderRouter)
 
+import analyticsRouter from './modules/analytics/routes'
+app.use('/api/v1/analytics', analyticsRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {

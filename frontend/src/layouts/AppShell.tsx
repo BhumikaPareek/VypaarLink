@@ -108,7 +108,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Inventory', path: '/inventory', icon: <BoxIcon />, available: true },
   { label: 'Suppliers', path: '/suppliers', icon: <TruckIcon />, available: true },
   { label: 'Purchase Orders', path: '/purchase-orders', icon: <LedgerIcon />, available: true },
-  { label: 'Analytics', path: '/analytics', icon: <ChartIcon />, available: false },
+  { label: 'Analytics', path: '/analytics', icon: <ChartIcon />, available: true },
 ]
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -202,9 +202,9 @@ export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-bg overflow-hidden">
+    <div className="flex min-h-screen bg-bg">
       {/* ── Desktop sidebar (fixed, always visible ≥ lg) ── */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-60 xl:w-64 bg-primary-dark border-r border-primary flex-shrink-0">
+      <aside className="hidden lg:flex lg:flex-col lg:w-60 xl:w-64 bg-primary-dark border-r border-primary flex-shrink-0 sticky top-0 h-screen">
         <SidebarContent />
       </aside>
 
@@ -234,9 +234,9 @@ export default function AppShell() {
       )}
 
       {/* ── Main area: header + content ── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-bg">
+      <div className="flex-1 flex flex-col min-w-0 bg-bg">
         {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border shadow-sm z-10">
+        <header className="lg:hidden sticky top-0 flex items-center justify-between px-4 py-3 bg-surface border-b border-border shadow-sm z-20">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-gray-100"
@@ -249,14 +249,14 @@ export default function AppShell() {
         </header>
 
         {/* Desktop header */}
-        <header className="hidden lg:flex items-center justify-between px-6 py-4 bg-surface border-b border-border shadow-sm z-10">
+        <header className="hidden lg:flex sticky top-0 items-center justify-between px-6 py-4 bg-surface border-b border-border shadow-sm z-20">
           <h1 className="text-base font-semibold text-text">
             {/* Page title – populated by Outlet via context or page component */}
           </h1>
         </header>
 
-        {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Page content */}
+        <main className="flex-1 bg-bg pb-12">
           <Outlet />
         </main>
       </div>

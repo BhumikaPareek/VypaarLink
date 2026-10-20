@@ -146,22 +146,39 @@ export const adjustStock = async (
     const product = await tx.product.findFirst({ where: { id: productId, shopId } })
     if (!product) throw new Error('Product not found')
 
-    let newQuantity: number
+    let updated: any
 
     if (type === 'STOCK_IN') {
-      newQuantity = product.quantity + quantity
+      updated = await tx.product.update({
+        where: { id: productId },
+        data: { quantity: { increment: quantity } },
+      })
     } else if (type === 'STOCK_OUT') {
-      newQuantity = product.quantity - quantity
-      if (newQuantity < 0) throw new Error('Insufficient stock')
-    } else {
-      newQuantity = quantity
-      if (newQuantity < 0) throw new Error('Quantity cannot be negative')
-    }
+      const updateResult = await tx.product.updateMany({
+        where: {
+          id: productId,
+          shopId,
+          quantity: { gte: quantity },
+        },
+        data: {
+          quantity: { decrement: quantity },
+        },
+      })
 
-    const updated = await tx.product.update({
-      where: { id: productId },
-      data: { quantity: newQuantity },
-    })
+      if (updateResult.count === 0) {
+        throw new Error('Insufficient stock')
+      }
+
+      updated = await tx.product.findUniqueOrThrow({
+        where: { id: productId },
+      })
+    } else {
+      if (quantity < 0) throw new Error('Quantity cannot be negative')
+      updated = await tx.product.update({
+        where: { id: productId },
+        data: { quantity },
+      })
+    }
 
     await tx.stockMovement.create({
       data: {
@@ -216,18 +233,37 @@ export const deductStockForSale = async (
   shopId: string,
   items: Array<{ productId: string; quantity: number }>
 ) => {
+  // Consolidate duplicate products if any, then sort deterministically by productId to prevent deadlocks
+  const consolidatedMap = new Map<string, number>()
   for (const item of items) {
+    consolidatedMap.set(item.productId, (consolidatedMap.get(item.productId) ?? 0) + item.quantity)
+  }
+
+  const sortedItems = Array.from(consolidatedMap.entries())
+    .map(([productId, quantity]) => ({ productId, quantity }))
+    .sort((a, b) => a.productId.localeCompare(b.productId))
+
+  for (const item of sortedItems) {
     const product = await tx.product.findFirst({
       where: { id: item.productId, shopId, isActive: true },
     })
     if (!product) throw new Error(`Product not found or inactive: ${item.productId}`)
-    const newQty = product.quantity - item.quantity
-    if (newQty < 0) throw new Error(`Insufficient stock for product: ${product.name} (available: ${product.quantity})`)
 
-    await tx.product.update({
-      where: { id: item.productId },
-      data: { quantity: newQty },
+    const updateResult = await tx.product.updateMany({
+      where: {
+        id: item.productId,
+        shopId,
+        isActive: true,
+        quantity: { gte: item.quantity },
+      },
+      data: {
+        quantity: { decrement: item.quantity },
+      },
     })
+
+    if (updateResult.count === 0) {
+      throw new Error(`Insufficient stock for product: ${product.name} (available: ${product.quantity})`)
+    }
 
     await tx.stockMovement.create({
       data: {
