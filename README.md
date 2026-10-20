@@ -114,7 +114,7 @@ Backend API → http://localhost:3000
 - [x] **Stage 2** — Inventory: products, stock, pricing, alerts
 - [x] **Stage 3** — Supplier Workflow: suppliers, orders, restock
 - [x] **Stage 4** — Business Intelligence: trends, analytics, insights
-- [ ] **Stage 5** — Intelligent Assistant: AI-powered business queries
+- [x] **Stage 5** — Intelligent Assistant: AI-powered business queries
 - [ ] **Stage 6** — Production Refinement: security, testing, deployment
 
 ---
