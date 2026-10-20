@@ -80,6 +80,9 @@ app.use('/api/v1/purchase-orders', purchaseOrderRouter)
 import analyticsRouter from './modules/analytics/routes'
 app.use('/api/v1/analytics', analyticsRouter)
 
+import assistantRouter from './modules/assistant/routes'
+app.use('/api/v1/assistant', assistantRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {

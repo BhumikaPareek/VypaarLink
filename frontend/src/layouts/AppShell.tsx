@@ -76,6 +76,18 @@ function ChartIcon() {
   )
 }
 
+function BotIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+      <rect x="3" y="11" width="18" height="10" rx="2" />
+      <circle cx="12" cy="5" r="2" />
+      <path d="M12 7v4" />
+      <line x1="8" y1="16" x2="8" y2="16.01" strokeWidth={2.5} strokeLinecap="round" />
+      <line x1="16" y1="16" x2="16" y2="16.01" strokeWidth={2.5} strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function LogoutIcon() {
   return (
     <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
@@ -109,6 +121,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Suppliers', path: '/suppliers', icon: <TruckIcon />, available: true },
   { label: 'Purchase Orders', path: '/purchase-orders', icon: <LedgerIcon />, available: true },
   { label: 'Analytics', path: '/analytics', icon: <ChartIcon />, available: true },
+  { label: 'AI Assistant', path: '/assistant', icon: <BotIcon />, available: true },
 ]
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -246,13 +259,6 @@ export default function AppShell() {
           </button>
           <div className="text-primary text-lg font-bold">VypaarLink</div>
           <div className="w-8" /> {/* spacer */}
-        </header>
-
-        {/* Desktop header */}
-        <header className="hidden lg:flex sticky top-0 items-center justify-between px-6 py-4 bg-surface border-b border-border shadow-sm z-20">
-          <h1 className="text-base font-semibold text-text">
-            {/* Page title – populated by Outlet via context or page component */}
-          </h1>
         </header>
 
         {/* Page content */}

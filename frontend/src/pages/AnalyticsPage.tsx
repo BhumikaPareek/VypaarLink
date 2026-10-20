@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import {
@@ -25,6 +25,11 @@ export function AnalyticsPage() {
   const [customEnd, setCustomEnd] = useState('')
   const [appliedCustom, setAppliedCustom] = useState<{ start: string; end: string } | null>(null)
   const [groupBy, setGroupBy] = useState<'day' | 'week' | 'month'>('day')
+
+  // Reset vertical scroll position when switching tabs or mounting
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [activeTab])
 
   // Filter object for query
   const filter: AnalyticsFilter = {
@@ -466,7 +471,7 @@ export function AnalyticsPage() {
                   ✓ Healthy inventory rotation! No active products are stagnant.
                 </div>
               ) : (
-                <div className="overflow-x-auto max-h-[300px]">
+                <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-border text-text-muted font-medium">

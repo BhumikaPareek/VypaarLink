@@ -15,6 +15,7 @@ import { InventoryPage } from '@/pages/InventoryPage'
 import { SuppliersPage } from '@/pages/SuppliersPage'
 import { PurchaseOrdersPage } from '@/pages/PurchaseOrdersPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
+import { AssistantPage } from '@/pages/AssistantPage'
 import { type ReactNode } from 'react'
 
 function FullPageSpinner() {
@@ -86,6 +87,7 @@ function AppRoutes() {
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/assistant" element={<AssistantPage />} />
         </Route>
       </Route>
 

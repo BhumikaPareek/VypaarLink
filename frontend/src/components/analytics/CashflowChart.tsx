@@ -47,7 +47,7 @@ export function CashflowChart({ data, selectedGroupBy, onGroupByChange }: Cashfl
   const hoveredItem = hoveredIndex !== null && timeline[hoveredIndex] ? timeline[hoveredIndex] : null
 
   return (
-    <figure className="bg-surface rounded-2xl border border-border p-5 shadow-sm">
+    <figure className="bg-surface rounded-2xl border border-border p-5 shadow-sm relative">
       <figcaption className="sr-only">
         Cashflow comparison of credit issued versus payments collected over time
       </figcaption>
@@ -274,27 +274,29 @@ export function CashflowChart({ data, selectedGroupBy, onGroupByChange }: Cashfl
       )}
 
       {/* Accessible Table for Screen Readers */}
-      <table className="sr-only">
-        <caption>Cashflow timeline data</caption>
-        <thead>
-          <tr>
-            <th scope="col">Period</th>
-            <th scope="col">Payments Collected</th>
-            <th scope="col">Credit Issued</th>
-            <th scope="col">Net Cashflow</th>
-          </tr>
-        </thead>
-        <tbody>
-          {timeline.map((item) => (
-            <tr key={item.key}>
-              <td>{item.label}</td>
-              <td>{formatCurrency(item.paymentsCollected)}</td>
-              <td>{formatCurrency(item.creditIssued)}</td>
-              <td>{formatCurrency(item.netCashflow)}</td>
+      <div className="sr-only">
+        <table>
+          <caption>Cashflow timeline data</caption>
+          <thead>
+            <tr>
+              <th scope="col">Period</th>
+              <th scope="col">Payments Collected</th>
+              <th scope="col">Credit Issued</th>
+              <th scope="col">Net Cashflow</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {timeline.map((item) => (
+              <tr key={item.key}>
+                <td>{item.label}</td>
+                <td>{formatCurrency(item.paymentsCollected)}</td>
+                <td>{formatCurrency(item.creditIssued)}</td>
+                <td>{formatCurrency(item.netCashflow)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   )
 }
