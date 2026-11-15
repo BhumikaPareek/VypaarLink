@@ -23,11 +23,13 @@ VypaarLink provides a shared, verified digital ledger between shopkeeper and cus
 
 ---
 
-## Current Stage
+## Current Status
 
-> **Stage 0 — Foundation**
-> 
-> Project structure, architecture, development tooling, and database foundation have been established. Core business features are being developed incrementally.
+> **All 6 planned development stages completed.**
+>
+> VypaarLink has progressed from its initial foundation to a functional prototype featuring digital credit management, inventory, supplier workflows, business analytics, an intelligent assistant, and platform administration.
+>
+> The source code is publicly available on GitHub. Live deployment and further production validation remain future activities.
 
 ---
 
@@ -98,7 +100,7 @@ npx prisma migrate dev
 ### 5. Start development servers
 
 ```bash
-# From project root
+cd ..
 npm run dev
 ```
 
@@ -115,7 +117,7 @@ Backend API → http://localhost:3000
 - [x] **Stage 3** — Supplier Workflow: suppliers, orders, restock
 - [x] **Stage 4** — Business Intelligence: trends, analytics, insights
 - [x] **Stage 5** — Intelligent Assistant: AI-powered business queries
-- [x] **Stage 6** — Production Refinement: security, testing, deployment
+- [x] **Stage 6** — Platform Administration: admin authentication, platform dashboard, shop directory, and flagged dispute monitoring
 
 ---
 
