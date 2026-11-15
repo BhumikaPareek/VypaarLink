@@ -64,3 +64,5 @@ patch-dashboard.js
 
 # Local Test Scripts
 backend/e2e-test.ts
+# Local database backups
+/backups/

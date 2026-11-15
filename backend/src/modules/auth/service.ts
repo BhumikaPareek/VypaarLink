@@ -174,6 +174,10 @@ export async function loginUser(input: LoginInput): Promise<{ user: SafeUser; to
     throw new Error('Invalid phone number or password')
   }
 
+  if (user.role === 'PLATFORM_ADMIN') {
+    throw new Error('Platform administrators must log in via the administrator portal.')
+  }
+
   if (!user.isClaimed) {
     throw new Error('This account has not been activated yet. Please complete registration to claim your account.')
   }

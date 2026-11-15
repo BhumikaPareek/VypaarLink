@@ -12,8 +12,12 @@ const handleError = (res: Response, err: unknown) => {
       'Supplier not found': 404,
       'Shop not found': 404,
     }
-    const status = statusMap[err.message] ?? 400
-    return res.status(status).json({ status: 'error', message: err.message })
+    const status = statusMap[err.message]
+    if (status) {
+      return res.status(status).json({ status: 'error', message: err.message })
+    }
+    console.error('[SUPPLIER ERROR]', err)
+    return res.status(500).json({ status: 'error', message: 'Internal server error' })
   }
   return res.status(500).json({ status: 'error', message: 'Internal server error' })
 }

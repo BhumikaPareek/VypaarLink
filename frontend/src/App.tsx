@@ -1,9 +1,13 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { AuthProvider, useAuthContext } from '@/store/AuthContext'
+import { AdminAuthProvider, useAdminAuth } from '@/store/AdminAuthContext'
 import { ShopProvider, useShop } from '@/store/ShopContext'
 import AppShell from '@/layouts/AppShell'
+import AdminShell from '@/layouts/AdminShell'
 import LoginPage from '@/features/auth/LoginPage'
 import RegisterPage from '@/features/auth/RegisterPage'
+import AdminLoginPage from '@/features/admin/AdminLoginPage'
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { CustomersPage } from '@/pages/CustomersPage'
 import { CustomerProfilePage } from '@/pages/CustomerProfilePage'
@@ -59,6 +63,26 @@ function ShopGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminProtectedRoute({ children }: { children: ReactNode }) {
+  const { status, adminUser } = useAdminAuth()
+
+  if (status === 'loading') return <FullPageSpinner />
+  if (status === 'unauthenticated' || adminUser?.role !== 'PLATFORM_ADMIN') {
+    return <Navigate to="/admin/login" replace />
+  }
+  return <>{children}</>
+}
+
+function AdminPublicRoute({ children }: { children: ReactNode }) {
+  const { status, adminUser } = useAdminAuth()
+
+  if (status === 'loading') return <FullPageSpinner />
+  if (status === 'authenticated' && adminUser?.role === 'PLATFORM_ADMIN') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
+  return <>{children}</>
+}
+
 function RootRedirect() {
   const { status } = useAuthContext()
   if (status === 'loading') return <FullPageSpinner />
@@ -91,6 +115,13 @@ function AppRoutes() {
         </Route>
       </Route>
 
+      {/* Platform Administration Routes */}
+      <Route path="/admin/login" element={<AdminPublicRoute><AdminLoginPage /></AdminPublicRoute>} />
+      <Route path="/admin" element={<AdminProtectedRoute><AdminShell /></AdminProtectedRoute>}>
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+      </Route>
+
       <Route
         path="*"
         element={
@@ -113,7 +144,9 @@ export default function App() {
   return (
     <ToastProvider>
       <AuthProvider>
-        <AppRoutes />
+        <AdminAuthProvider>
+          <AppRoutes />
+        </AdminAuthProvider>
       </AuthProvider>
     </ToastProvider>
   )

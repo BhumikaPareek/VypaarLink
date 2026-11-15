@@ -18,8 +18,27 @@ const handleError = (res: Response, err: unknown) => {
       'Supplier not found or is archived': 400,
       'Shop not found': 404,
     }
-    const status = statusMap[err.message] ?? 400
-    return res.status(status).json({ status: 'error', message: err.message })
+    const status = statusMap[err.message]
+    if (status) {
+      return res.status(status).json({ status: 'error', message: err.message })
+    }
+    // Check known domain validation errors
+    if (
+      err.message.includes('Only DRAFT') ||
+      err.message.includes('Cannot cancel') ||
+      err.message.includes('already cancelled') ||
+      err.message.includes('Cannot receive') ||
+      err.message.includes('already been fully received') ||
+      err.message.includes('exceeds') ||
+      err.message.includes('One or more selected products') ||
+      err.message.includes('Cannot record payments') ||
+      err.message.includes('Order item not found')
+    ) {
+      return res.status(400).json({ status: 'error', message: err.message })
+    }
+
+    console.error('[PURCHASE_ORDER ERROR]', err)
+    return res.status(500).json({ status: 'error', message: 'Internal server error' })
   }
   return res.status(500).json({ status: 'error', message: 'Internal server error' })
 }

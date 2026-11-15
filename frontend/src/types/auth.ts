@@ -5,7 +5,7 @@
  * Keeping types co-located with features makes them easy to find.
  */
 
-export type UserRole = 'SHOPKEEPER' | 'CUSTOMER'
+export type UserRole = 'SHOPKEEPER' | 'CUSTOMER' | 'PLATFORM_ADMIN'
 
 /** Safe user object returned by all auth endpoints — never includes passwordHash */
 export type User = {

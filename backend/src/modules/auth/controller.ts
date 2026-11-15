@@ -99,8 +99,12 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     })
   } catch (err) {
     if (err instanceof Error) {
+      if (err.message === 'Platform administrators must log in via the administrator portal.') {
+        res.status(403).json({ status: 'error', message: err.message })
+        return
+      }
       // Invalid credentials — 401 Unauthorized
-      if (err.message.includes('Invalid') || err.message.includes('deactivated')) {
+      if (err.message.includes('Invalid') || err.message.includes('deactivated') || err.message.includes('not been activated')) {
         res.status(401).json({ status: 'error', message: err.message })
         return
       }

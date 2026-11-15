@@ -24,6 +24,7 @@ datasource db {
 enum UserRole {
   SHOPKEEPER
   CUSTOMER
+  PLATFORM_ADMIN
 }
 
 enum TransactionType {

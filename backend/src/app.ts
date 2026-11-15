@@ -83,6 +83,12 @@ app.use('/api/v1/analytics', analyticsRouter)
 import assistantRouter from './modules/assistant/routes'
 app.use('/api/v1/assistant', assistantRouter)
 
+import adminAuthRouter from './modules/admin/auth/routes'
+app.use('/api/v1/admin/auth', adminAuthRouter)
+
+import adminDashboardRouter from './modules/admin/dashboard/routes'
+app.use('/api/v1/admin', adminDashboardRouter)
+
 
 // ── 404 Handler ───────────────────────────────────────────────────────
 app.use((_req, res) => {

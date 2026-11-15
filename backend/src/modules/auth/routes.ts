@@ -23,10 +23,18 @@ const otpLimiter = rateLimit({
   legacyHeaders: false,
 })
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { status: 'error', message: 'Too many login attempts from this IP, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
 
 router.post('/send-otp', otpLimiter, requestOtp)
 router.post('/verify-register', otpLimiter, verifyAndRegister)
-router.post('/login', login)
+router.post('/login', loginLimiter, login)
 router.post('/customer-login', otpLimiter, customerLogin)
 router.get('/me', authenticate, me)
 router.post('/logout', logout)
